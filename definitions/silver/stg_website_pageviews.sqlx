@@ -1,0 +1,21 @@
+config {
+    type : "table",
+    schema : "silver_toys_store",
+    name : "stg_website_pageviews",
+    tags : ["silver", "website", "website pageviews"],
+    description : "Cleaned and standardized website_pageviews data",
+    bigquery : {
+        partitionBy : "DATE(created_at)"
+    }
+}
+
+SELECT
+    wp.website_pageview_id,
+    ${parse_date.parse_datetime("wp.created_at")} AS created_at,
+    wp.website_session_id AS website_session_id,
+    wp.pageview_url AS pageview_url,
+    ${pageview_category.pageview_category("wp.pageview_url")} END AS pageview_category,
+    TIMESTAMP_ADD(_airbyte_extracted_at, INTERVAL 7 HOUR) AS ab_extract_at,
+    CURRENT_DATETIME("Asia/Jakarta") AS df_load_at
+FROM
+    ${ref("website_pageviews")} AS wp

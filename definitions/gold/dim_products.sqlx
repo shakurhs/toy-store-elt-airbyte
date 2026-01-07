@@ -1,0 +1,15 @@
+config {
+    type : "table",
+    schema : "gold_toys_store",
+    name : "dim_products",
+    tags : ["gold", "dimensions"],
+    description : "Product names and attributes lookup table"
+}
+
+SELECT
+    product_id
+    , product_name
+    , created_at
+
+FROM
+    ${ref("stg_products")}

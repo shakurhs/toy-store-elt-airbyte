@@ -1,0 +1,35 @@
+config {
+    type : "table",
+    schema : "gold_toys_store",
+    name : "fct_order_items",
+    tags : ["gold", "sales", "fact"],
+    description : "Build Orders Items fact table",
+    bigquery : {
+        partitionBy : "DATE(created_at)"
+    }
+}
+
+SELECT
+    oi.order_item_id
+    , oi.order_id
+    , o.website_session_id
+    , o.user_id
+    , oi.product_id
+    , oi.is_primary_item
+    , 1 AS quantity
+    , oi.item_price_usd
+    , oi.Item_cogs_usd
+    , oir.order_item_refund_id
+    , (oi.item_price_usd - oi.item_cogs_usd) AS gross_margin_usd
+    , COALESCE(oir.refund_amount_usd, 0) AS refund_amount
+    , (oi.item_price_usd - COALESCE(oir.refund_amount_usd, 0)) AS net_revenue_usd
+    , oi.created_at
+    
+FROM
+    ${ref("stg_order_items")} AS oi
+LEFT JOIN ${ref("stg_products")} AS p
+    ON oi.product_id = p.product_id
+LEFT JOIN ${ref("stg_orders")} AS o
+    ON oi.order_id = o.order_id
+LEFT JOIN ${ref("stg_order_item_refunds")} AS oir
+    ON oir.order_item_id = oi.order_item_id

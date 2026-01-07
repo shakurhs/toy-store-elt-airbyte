@@ -1,0 +1,16 @@
+config {
+    type: "view",
+    schema: "gold_toys_store",
+    name: "rpt_sessions_landing_pages",
+    tags: ["gold", "reporting"],
+    description: "Final reporting table for session performance and landing page analysis"
+}
+
+
+SELECT
+    ws.*
+    , COALESCE(pv.pageview_category, "Unknown") AS landing_page_category
+    , COALESCE(pv.pageview_url, "Unknown") AS landing_page_url
+FROM ${ref("fct_website_sessions")} ws
+LEFT JOIN ${ref("dim_pageviews")} pv
+    ON pv.website_pageview_id = ws.landing_pageview_id

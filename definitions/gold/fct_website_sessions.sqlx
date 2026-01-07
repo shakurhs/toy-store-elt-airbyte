@@ -1,0 +1,42 @@
+config {
+    type : "table",
+    schema : "gold_toys_store",
+    name : "fct_website_sessions",
+    tags : ["gold", "sessions", "fact"],
+    description : "Build Website Sessions fact table",
+    bigquery : {
+        partitionBy : "DATE(created_at)"
+    }
+}
+
+
+WITH session_metric AS (
+    SELECT 
+        website_session_id
+        , COUNT(website_pageview_id) AS total_page_viewed
+        , MIN(website_pageview_id) AS landing_pageview_id
+    FROM
+        ${ref("stg_website_pageviews")}
+    GROUP BY
+        1
+)
+
+SELECT
+    ws.website_session_id
+    , ws.user_id
+    , ws.is_repeat_session
+    , ws.utm_source
+    , ws.utm_campaign
+    , ws.utm_content
+    , ws.device_type
+    , ws.http_referrer
+    , sm.total_page_viewed
+    , sm.landing_pageview_id
+    , ws.created_at
+    
+FROM
+    ${ref("stg_website_sessions")} AS ws
+
+LEFT JOIN session_metric AS sm
+    ON sm.website_session_id = ws.website_session_id
+
