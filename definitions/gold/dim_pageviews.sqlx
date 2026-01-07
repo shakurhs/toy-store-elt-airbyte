@@ -14,7 +14,7 @@ SELECT
     , website_session_id
     , pageview_url
     , pageview_category
-    , created_at
+    ,  created_at
     
 FROM
     ${ref("stg_website_pageviews")}
