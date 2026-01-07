@@ -1,0 +1,27 @@
+config {
+    type : "view",
+    schema : "gold_toys_store",
+    name : "rpt_user_retention_heatmap",
+    tags : ["gold", "report"],
+    description : "User cohort retention for data viz"
+}
+
+WITH user_activity AS (
+  SELECT
+      u.user_id
+      , DATE_TRUNC(u.first_visit_date, MONTH) AS cohort_month
+      , DATE_TRUNC(ws.created_at, MONTH) AS activity_month
+  FROM 
+      ${ref("dim_users")} u
+  INNER JOIN ${ref("fct_website_sessions")} ws
+      ON ws.user_id = u.user_id
+)
+
+SELECT
+    cohort_month
+    , activity_month
+    , DATE_DIFF(activity_month, cohort_month, MONTH) AS month_since_joining
+    , COUNT(DISTINCT user_id) AS active_users
+FROM 
+    user_activity
+GROUP BY 1, 2, 3

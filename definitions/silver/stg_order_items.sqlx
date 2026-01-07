@@ -1,0 +1,23 @@
+config {
+    type : "table",
+    schema : "silver_toys_store",
+    name : "stg_order_items",
+    tags : ["silver", "sales", "order items"],
+    description : "Cleaned and standardized order_items data",
+    bigquery : {
+        partitionBy : "DATE(created_at)"
+    }
+}
+
+SELECT
+    oi.order_item_id,
+    ${parse_date.parse_datetime("oi.created_at")} AS created_at,
+    oi.order_id AS order_id,
+    oi.product_id AS product_id,
+    CAST(oi.is_primary_item AS INT64) AS is_primary_item,
+    CAST(oi.price_usd AS FLOAT64) AS item_price_usd,
+    CAST(oi.cogs_usd AS FLOAT64) AS item_cogs_usd,
+    TIMESTAMP_ADD(_airbyte_extracted_at, INTERVAL 7 HOUR) AS ab_extract_at,
+    CURRENT_DATETIME("Asia/Jakarta") AS df_load_at
+FROM
+    ${ref("order_items")} AS oi

@@ -1,0 +1,29 @@
+config {
+    type : "table",
+    schema : "gold_toys_store",
+    name : "dim_users",
+    tags : ["gold", "dimensions"],
+    description : "user names and attributes lookup table",
+    bigquery : {
+        partitionBy : "DATE(first_visit_date)"
+    }
+}
+
+WITH ranked_sessions AS (
+    SELECT
+        user_id
+        , website_session_id
+        , utm_source AS first_visit_source
+        , utm_campaign AS first_visit_campaign
+        , utm_content AS first_visit_content
+        , created_at AS first_visit_date
+        , ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY created_at ASC) AS session_rank
+    FROM
+        ${ref("stg_website_sessions")}
+
+)
+
+SELECT * EXCEPT(session_rank)
+FROM
+    ranked_sessions
+WHERE session_rank = 1

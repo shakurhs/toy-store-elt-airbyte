@@ -1,0 +1,20 @@
+config {
+    type : "table",
+    schema : "gold_toys_store",
+    name : "dim_pageviews",
+    tags : ["gold", "dimensions"],
+    description : "Page names and attributes lookup table",
+    bigquery : {
+        partitionBy : "DATE(created_at)"
+    }
+}
+
+SELECT
+    website_pageview_id
+    , website_session_id
+    , pageview_url
+    , pageview_category
+    ,  created_at
+    
+FROM
+    ${ref("stg_website_pageviews")}

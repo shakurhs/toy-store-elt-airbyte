@@ -1,0 +1,5 @@
+config {
+    type : "declaration",
+    schema : "toys_store_dataset",
+    name : "website_pageviews"
+}
